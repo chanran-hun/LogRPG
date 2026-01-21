@@ -28,9 +28,16 @@ public:
         return def;
     }
 
+    string getName()const{
+        return name;
+    }
+
+    int getHp()const{
+        return hp;
+    }
+
     void takeDamage(int dmg){
         hp -= dmg;
-        cout << "맞았어요... 상태창 켜보세요" << endl;
         if(hp < 0) hp = 0;
     }
 
@@ -82,6 +89,14 @@ public:
         return atk;
     }
 
+    string getName()const{
+        return name;
+    }
+
+    int getHp()const{
+        return hp;
+    }
+
     bool isAlive()const{
         return hp > 0;
     }
@@ -93,11 +108,13 @@ public:
 
 void battle(Player &p, Monster &m){
     while(p.isAlive() && m.isAlive()){
-        int dmg = max(0,p.getAtk()-m.getDef());
+        int dmg = max(1,p.getAtk()-m.getDef());
         m.takeDamage(dmg);
 
+        cout << p.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
+
         if(m.isAlive()){
-            dmg = max(0, m.getAtk()-p.getDef());
+            dmg = max(1, m.getAtk()-p.getDef());
             p.takeDamage(dmg);
         }
     }
