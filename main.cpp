@@ -20,6 +20,14 @@ public:
     exp(0)
     {} 
     
+    int getAtk()const{
+        return atk;
+    }
+
+    int getDef()const{
+        return def;
+    }
+
     void takeDamage(int dmg){
         hp -= dmg;
         cout << "맞았어요... 상태창 켜보세요" << endl;
@@ -65,15 +73,41 @@ public:
     atk(atk), 
     def(def)
     {} 
+
+    int getDef()const{
+        return def;
+    }
+
+    int getAtk()const{
+        return atk;
+    }
+
+    bool isAlive()const{
+        return hp > 0;
+    }
+
+    void takeDamage(int dmg){
+        hp = max(0, hp - dmg);
+    }
 };
 
+void battle(Player &p, Monster &m){
+    while(p.isAlive() && m.isAlive()){
+        int dmg = max(0,p.getAtk()-m.getDef());
+        m.takeDamage(dmg);
+
+        if(m.isAlive()){
+            dmg = max(0, m.getAtk()-p.getDef());
+            p.takeDamage(dmg);
+        }
+    }
+}
+
 int main(){ 
-    Player test = Player("test", 30, 5, 3); 
-    test.printStatus();
-    test.takeDamage(1);
-    test.printStatus();
-    test.gainEXP(20);
-    test.takeDamage(35);
-    test.printStatus();
+    Player test = Player("test", 30, 5, 1); 
+    Monster test1 = Monster("test1", 10, 4, 0);
+
+    battle(test, test1);
+
     return 0; 
 }
