@@ -115,25 +115,17 @@ bool isCritical(){
 void battle(Player &p, Monster &m){
     while(p.isAlive() && m.isAlive()){
         int dmg = max(1,p.getAtk()-m.getDef());
-        if(isCritical()){
-            dmg *= 2;
-            cout << "★ " << p.getName() << " 치명타!" << endl;
-        }
-
+        if(isCritical())dmg *= 2;
+            
+        cout << (isCritical() ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmg << " 의 피해를 입혔습니다." << endl;
         m.takeDamage(dmg);
-
-        cout << p.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
 
         if(m.isAlive()){
             dmg = max(1, m.getAtk()-p.getDef());
+            if(isCritical())dmg *= 2;
             
-            if(isCritical()){
-                dmg *= 2;
-                cout << "★ " << m.getName() << " 치명타!" << endl;
-            }
-            
+            cout << (isCritical() ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmg << " 의 피해를 입혔습니다." << endl;
             p.takeDamage(dmg);
-            cout << m.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
         }
         cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
     }
