@@ -1,4 +1,6 @@
 ﻿#include <iostream> 
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
 class Player{ 
@@ -106,23 +108,48 @@ public:
     }
 };
 
+bool isCritical(){
+    return rand() % 100 < 20;
+}
+
 void battle(Player &p, Monster &m){
     while(p.isAlive() && m.isAlive()){
         int dmg = max(1,p.getAtk()-m.getDef());
+        if(isCritical()){
+            dmg *= 2;
+            cout << "★ " << p.getName() << " 치명타!" << endl;
+        }
+
         m.takeDamage(dmg);
 
         cout << p.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
 
         if(m.isAlive()){
             dmg = max(1, m.getAtk()-p.getDef());
+            
+            if(isCritical()){
+                dmg *= 2;
+                cout << "★ " << m.getName() << " 치명타!" << endl;
+            }
+            
             p.takeDamage(dmg);
+            cout << m.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
         }
+        cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
+    }
+
+    if(p.isAlive()){
+        cout << "승리하셨습니다." << endl;
+    } else {
+        cout << "패배하셨습니다." << endl;
     }
 }
 
 int main(){ 
     Player test = Player("test", 30, 5, 1); 
     Monster test1 = Monster("test1", 10, 4, 0);
+
+    srand(time(nullptr));
 
     battle(test, test1);
 
