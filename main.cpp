@@ -48,6 +48,22 @@ public:
         return hp > 0;
     }
     
+    void increaseAtk(int amount = 1){
+        atk += amount;
+        cout << "공격력이 +" << amount << " 증가했습니다!\n";
+    }
+
+    void increaseDef(int amount = 1){
+        def += amount;
+        cout << "방어력이 +" << amount << " 증가했습니다!\n";
+    }
+
+    void increaseMaxHp(int amount = 5){
+        maxHp += amount;
+        hp = maxHp;
+        cout << "최대 체력이 +" << amount << " 증가하고 체력이 회복되었습니다!\n";
+    }
+
     void gainEXP(int amount){
         exp += amount;
         while(exp >= 20){
@@ -56,7 +72,7 @@ public:
             atk += 1;
             maxHp += 5;
             hp = maxHp;
-            cout << "=== 레벨 업! LV." << level << "===" << endl;
+            cout << "\n=== 레벨 업! LV." << level << " ===\n" << endl;
         }
     }
     
@@ -159,13 +175,93 @@ void battle(Player &p, Monster &m){
     }
 }
 
-int main(){ 
-    Player test = Player("test", 30, 5, 1); 
-    Monster test1 = Monster("test1", 10, 4, 0);
+function rewardText(int rewardIndex) -> string:
+    switch rewardIndex:
+        case 0: return "공격력 +1";
+        case 1: return "방어력 +1";
+        case 2: return "최대 체력 +5";
 
+void chooseReward(Player& p){
+    // 1) 보상 후보 인덱스 목록
+    idx = [0,1,2];
+
+    // 2) 인덱스 랜덤하게 섞기
+    shuffle(idx);
+    
+    // 3) 섞인것 중 앞 두가지 선택
+    pick1 = idx[0];
+    pick2 = idx[1]; 
+
+    // 4) 화면에 선택 목록 추가
+    print "보상을 선택하세요";
+    print "1) " + rewardText(pick1);
+    print "2) " + rewardText(pick2);
+
+    // 5) 사용자 입력 받기
+    input choice;
+
+    // 6) choice를 실제 보상 인덱스로 변환
+    if choice == 1:
+        chosen = pick1;
+    else if choice == 2:
+        chosen = pick2;
+    else :
+        (잘못입력 처리: 다시 입력받거나 기본값)
+
+    // 7) chosen에 따라 효과 적용
+    applyReward(p,chosen);
+
+
+    cout << "\n보상을 선택하세요:\n";
+    cout << "1) 공격력 +1\n";
+    cout << "2) 방어력 +1\n";
+    cout << "3) 최대 체력 +5\n";
+    cout << "> ";
+
+    int choice;
+    cin >> choice;
+
+    switch(choice){
+        case 1: p.increaseAtk(); break;
+        case 2: p.increaseDef(); break;
+        case 3: p.increaseMaxHp(); break;
+        default:
+            cout << "잘못된 선택입니다. 기본 보상으로 공격력 +1을 받습니다.\n";
+            p.increaseAtk();
+    }
+
+    cout << "[STAT] ATK:" << p.getAtk() << " DEF:" << p.getDef() << " HP:" << p.getHp() << endl;
+}
+
+Monster makeMonster(int stage){
+    int baseHp = 30 + 5*stage;
+    int baseAtk = 6 + stage*2;
+    int baseDef = 2 + stage/2;
+
+    return Monster("슬라임", baseHp, baseAtk, baseDef);
+}
+
+int main(){ 
     srand(time(nullptr));
 
-    battle(test, test1);
+    Player p = Player("Hero", 60, 14, 4);
+
+    int stage = 1;
+
+    while(p.isAlive()){
+        cout << "\n==== STAGE " << stage << " ====\n";
+
+        Monster m = makeMonster(stage);
+        battle(p,m);
+
+        if(!p.isAlive()) break;
+
+        chooseReward(p);
+        stage++;
+    }
+
+    cout << "\n=== 게임종료 ===\n";
+    cout << "클리어한 스테이지: " << stage-1 << endl;
 
     return 0; 
 }
