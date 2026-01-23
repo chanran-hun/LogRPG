@@ -50,12 +50,13 @@ public:
     
     void gainEXP(int amount){
         exp += amount;
-        if(exp >= 20){
+        while(exp >= 20){
             level++;
             exp -= 20;
             atk += 1;
             maxHp += 5;
             hp = maxHp;
+            cout << "=== 레벨 업! LV." << level << "===" << endl;
         }
     }
     
@@ -120,27 +121,27 @@ bool isDodge(){
 void battle(Player &p, Monster &m){
     while(p.isAlive() && m.isAlive()){
         if(isDodge()){
-            cout << "💨 " << m.getName() << "이(가) 회피했습니다!" << endl;
+            cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
         } else {
-            bool crit = isCritical();
-            int dmg = max(1,p.getAtk()-m.getDef());
-            if(crit)dmg *= 2;
+            bool critP = isCritical();
+            int dmgP = max(1,p.getAtk()-m.getDef());
+            if(critP)dmgP *= 2;
                 
-            cout << (crit ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
-            m.takeDamage(dmg);
+            cout << (critP ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmgP << "의 피해를 입혔습니다." << endl;
+            m.takeDamage(dmgP);
         }
         
 
         if(m.isAlive()){
             if(isDodge()){
-                cout << "💨 " << p.getName() << "이(가) 회피했습니다!" << endl;
+                cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
             } else {
                 bool critM = isCritical();
-                int dmg = max(1, m.getAtk()-p.getDef());
-                if(critM)dmg *= 2;
+                int dmgM = max(1, m.getAtk()-p.getDef());
+                if(critM)dmgM *= 2;
                 
-                cout << (critM ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
-                p.takeDamage(dmg);
+                cout << (critM ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmgM << "의 피해를 입혔습니다." << endl;
+                p.takeDamage(dmgM);
             }
             
         }
@@ -149,6 +150,10 @@ void battle(Player &p, Monster &m){
 
     if(p.isAlive()){
         cout << "승리하셨습니다." << endl;
+
+        int reward = 10; 
+        cout << "경험치 +" << reward << "!" << endl;
+        p.gainEXP(reward);
     } else {
         cout << "패배하셨습니다." << endl;
     }
