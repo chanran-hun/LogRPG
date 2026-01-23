@@ -1,6 +1,7 @@
 ﻿#include <iostream> 
-#include <cstdlib>
-#include <ctime>
+#include <cstdlib>  //rand, srand
+#include <ctime>    //time
+#include <algorithm>    //max
 using namespace std;
 
 class Player{ 
@@ -112,20 +113,36 @@ bool isCritical(){
     return rand() % 100 < 20;
 }
 
+bool isDodge(){
+    return rand() % 100 < 10;
+}
+
 void battle(Player &p, Monster &m){
     while(p.isAlive() && m.isAlive()){
-        int dmg = max(1,p.getAtk()-m.getDef());
-        if(isCritical())dmg *= 2;
-            
-        cout << (isCritical() ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmg << " 의 피해를 입혔습니다." << endl;
-        m.takeDamage(dmg);
+        if(isDodge()){
+            cout << "💨 " << m.getName() << "이(가) 회피했습니다!" << endl;
+        } else {
+            bool crit = isCritical();
+            int dmg = max(1,p.getAtk()-m.getDef());
+            if(crit)dmg *= 2;
+                
+            cout << (crit ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
+            m.takeDamage(dmg);
+        }
+        
 
         if(m.isAlive()){
-            dmg = max(1, m.getAtk()-p.getDef());
-            if(isCritical())dmg *= 2;
+            if(isDodge()){
+                cout << "💨 " << p.getName() << "이(가) 회피했습니다!" << endl;
+            } else {
+                bool critM = isCritical();
+                int dmg = max(1, m.getAtk()-p.getDef());
+                if(critM)dmg *= 2;
+                
+                cout << (critM ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmg << "의 피해를 입혔습니다." << endl;
+                p.takeDamage(dmg);
+            }
             
-            cout << (isCritical() ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmg << " 의 피해를 입혔습니다." << endl;
-            p.takeDamage(dmg);
         }
         cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
     }
