@@ -181,54 +181,45 @@ function rewardText(int rewardIndex) -> string:
         case 1: return "방어력 +1";
         case 2: return "최대 체력 +5";
 
+function applyReward(Player& p, int rewardText):
+    switch rewardText:
+        case 0: p.increaseAtk(); break;
+        case 1: p.increaseDef(); break;
+        case 2: p.increaseHp(); break;
+
 void chooseReward(Player& p){
     // 1) 보상 후보 인덱스 목록
-    idx = [0,1,2];
+    int idx[3] = {0,1,2};
 
-    // 2) 인덱스 랜덤하게 섞기
-    shuffle(idx);
+    // 2) 인덱스 랜덤하게 섞기(이거 섞는걸 해본적이 별로 없어서 어떤 라이브러리의 어떤 함수를 써야하는지 잘 모르겠어)
+    shuffle(idx ,rng);  
     
     // 3) 섞인것 중 앞 두가지 선택
-    pick1 = idx[0];
-    pick2 = idx[1]; 
+    int pick1 = idx[0];
+    int pick2 = idx[1]; 
 
     // 4) 화면에 선택 목록 추가
-    print "보상을 선택하세요";
-    print "1) " + rewardText(pick1);
-    print "2) " + rewardText(pick2);
+    cout << "보상을 선택하세요";
+    cout << "1) " << rewardText(pick1);
+    cout << "2) " << rewardText(pick2);
 
     // 5) 사용자 입력 받기
-    input choice;
+    int choice = 0;
+    cin >> choice;
 
     // 6) choice를 실제 보상 인덱스로 변환
-    if choice == 1:
+    int chosen = 0;
+    if (choice == 1) {
         chosen = pick1;
-    else if choice == 2:
+    } else if (choice == 2 ){
         chosen = pick2;
-    else :
-        (잘못입력 처리: 다시 입력받거나 기본값)
+    } else {
+        cout << "잘못된 입력입니다. 기본값으로 1번 선택지를 선택하겠습니다" << endl;
+        chosen = pick1;
+    }
 
     // 7) chosen에 따라 효과 적용
     applyReward(p,chosen);
-
-
-    cout << "\n보상을 선택하세요:\n";
-    cout << "1) 공격력 +1\n";
-    cout << "2) 방어력 +1\n";
-    cout << "3) 최대 체력 +5\n";
-    cout << "> ";
-
-    int choice;
-    cin >> choice;
-
-    switch(choice){
-        case 1: p.increaseAtk(); break;
-        case 2: p.increaseDef(); break;
-        case 3: p.increaseMaxHp(); break;
-        default:
-            cout << "잘못된 선택입니다. 기본 보상으로 공격력 +1을 받습니다.\n";
-            p.increaseAtk();
-    }
 
     cout << "[STAT] ATK:" << p.getAtk() << " DEF:" << p.getDef() << " HP:" << p.getHp() << endl;
 }
@@ -243,6 +234,7 @@ Monster makeMonster(int stage){
 
 int main(){ 
     srand(time(nullptr));
+    rng = (좋은 랜덤 엔진);
 
     Player p = Player("Hero", 60, 14, 4);
 
