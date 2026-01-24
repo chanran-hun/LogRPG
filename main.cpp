@@ -128,14 +128,19 @@ public:
     }
 };
 
+bool rollChance(mt19937& rng, double p){
+    bernoulli_distribution d(p);
+    return d(rng);
+}
+
 bool isCritical(mt19937& rng){
-    bernoulli_distribution crit(0.20);
+    static bernoulli_distribution crit(0.20);
     return crit(rng);
 }
 
 bool isDodge(mt19937& rng){
-    bernoulli_distribution crit(0.10);
-    return crit(rng);
+    static bernoulli_distribution dodge(0.10);
+    return dodge(rng);
 }
 
 void battle(Player &p, Monster &m, mt19937& rng){
@@ -143,7 +148,7 @@ void battle(Player &p, Monster &m, mt19937& rng){
         if(isDodge(rng)){
             cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
         } else {
-            bool critP = isCritical();
+            bool critP = isCritical(rng);
             int dmgP = max(1,p.getAtk()-m.getDef());
             if(critP)dmgP *= 2;
                 
@@ -156,7 +161,7 @@ void battle(Player &p, Monster &m, mt19937& rng){
             if(isDodge(rng)){
                 cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
             } else {
-                bool critM = isCritical();
+                bool critM = isCritical(rng);
                 int dmgM = max(1, m.getAtk()-p.getDef());
                 if(critM)dmgM *= 2;
                 
