@@ -2,6 +2,8 @@
 #include <cstdlib>  //rand, srand
 #include <ctime>    //time
 #include <algorithm>    //max
+#include <vector>
+#include <random>
 using namespace std;
 
 class Player{ 
@@ -126,17 +128,19 @@ public:
     }
 };
 
-bool isCritical(){
-    return rand() % 100 < 20;
+bool isCritical(mt19937& rng){
+    bernoulli_distribution crit(0.20);
+    return crit(rng);
 }
 
-bool isDodge(){
-    return rand() % 100 < 10;
+bool isDodge(mt19937& rng){
+    bernoulli_distribution crit(0.10);
+    return crit(rng);
 }
 
-void battle(Player &p, Monster &m){
+void battle(Player &p, Monster &m, mt19937& rng){
     while(p.isAlive() && m.isAlive()){
-        if(isDodge()){
+        if(isDodge(rng)){
             cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
         } else {
             bool critP = isCritical();
@@ -149,7 +153,7 @@ void battle(Player &p, Monster &m){
         
 
         if(m.isAlive()){
-            if(isDodge()){
+            if(isDodge(rng)){
                 cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
             } else {
                 bool critM = isCritical();
@@ -187,21 +191,21 @@ function applyReward(Player& p, int rewardText):
         case 1: p.increaseDef(); break;
         case 2: p.increaseHp(); break;
 
-void chooseReward(Player& p){
+void chooseReward(Player& p, mt19937& rng){
     // 1) 보상 후보 인덱스 목록
-    int idx[3] = {0,1,2};
+    vector<int> idx = {0,1,2};
 
-    // 2) 인덱스 랜덤하게 섞기(이거 섞는걸 해본적이 별로 없어서 어떤 라이브러리의 어떤 함수를 써야하는지 잘 모르겠어)
-    shuffle(idx ,rng);  
+    // 2) 인덱스 랜덤하게 섞기
+    shuffle(idx.begin(), idx.end() ,rng);
     
     // 3) 섞인것 중 앞 두가지 선택
     int pick1 = idx[0];
     int pick2 = idx[1]; 
 
     // 4) 화면에 선택 목록 추가
-    cout << "보상을 선택하세요";
-    cout << "1) " << rewardText(pick1);
-    cout << "2) " << rewardText(pick2);
+    cout << "보상을 선택하세요\n";
+    cout << "1) " << rewardText(pick1) << "\n";
+    cout << "2) " << rewardText(pick2) << "\n> ";
 
     // 5) 사용자 입력 받기
     int choice = 0;
@@ -234,7 +238,7 @@ Monster makeMonster(int stage){
 
 int main(){ 
     srand(time(nullptr));
-    rng = (좋은 랜덤 엔진);
+    mt19937 rng;
 
     Player p = Player("Hero", 60, 14, 4);
 
@@ -244,11 +248,11 @@ int main(){
         cout << "\n==== STAGE " << stage << " ====\n";
 
         Monster m = makeMonster(stage);
-        battle(p,m);
+        battle(p,m,rng);
 
         if(!p.isAlive()) break;
 
-        chooseReward(p);
+        chooseReward(p,rng);
         stage++;
     }
 
