@@ -1,7 +1,5 @@
-﻿#include <iostream> 
-#include <cstdlib>  //rand, srand
-#include <ctime>    //time
-#include <algorithm>    //max, shuffle
+﻿#include <iostream>
+#include <algorithm>    //max, shuffle, clamp
 #include <vector>
 #include <random>
 #include <string>
@@ -215,7 +213,7 @@ void chooseReward(Player& p, mt19937& rng){
     int pick2 = idx[1]; 
 
     // 4) 화면에 선택 목록 추가
-    cout << "보상을 선택하세요\n";
+    cout << "===보상을 선택하세요===\n";
     cout << "1) " << rewardText(pick1) << "\n";
     cout << "2) " << rewardText(pick2) << "\n> ";
 
@@ -240,12 +238,45 @@ void chooseReward(Player& p, mt19937& rng){
     cout << "[STAT] ATK:" << p.getAtk() << " DEF:" << p.getDef() << " HP:" << p.getHp() << endl;
 }
 
-Monster makeMonster(int stage){
-    int baseHp = 30 + 5*stage;
-    int baseAtk = 6 + stage*2;
-    int baseDef = 2 + stage/2;
+struct MonsterTemplate{
+    string name;
+    int baseHp;
+    int baseAtk;
+    int baseDef;
+};
 
-    return Monster("슬라임", baseHp, baseAtk, baseDef);
+vector<MonsterTemplate> earlyMonsters = {
+    {"슬라임", 25, 6, 1},
+    {"들쥐", 18, 7, 0}
+};
+
+vector<MonsterTemplate> midMonsters = {
+    {"고블린", 30, 9, 2},
+    {"늑대", 26, 11, 1}
+};
+
+vector<MonsterTemplate> lateMonsters = {
+    {"오크", 40, 13, 3},
+    {"스켈레톤", 34, 12, 4}
+};
+
+Monster makeMonster(int stage, mt19937& rng){
+    // 1)stage에 따라 풀 고르기
+    const vector<MonsterTemplate>* pool = &earlyMonsters;
+    if(stage >= 4 && stage <= 6) pool = &midMonsters;
+    else if (stage >= 7) pool = &lateMonsters;
+
+    // 2)풀에서 랜덤으로 하나 뽑기
+    uniform_int_distribution<int> dist(0, (int)pool->size() - 1);
+    const MonsterTemplate& t = (*pool)[dist(rng)];
+
+    // 3)스테이지 보정
+    int hp = t.baseHp + stage * 3;
+    int atk = t.baseAtk + stage / 2;
+    int def = t.baseDef + stage / 3;
+
+    // 4) Monster 생성해서 반환
+    return Monster(t.name, hp, atk, def);
 }
 
 int main(){ 
@@ -253,22 +284,17 @@ int main(){
 
     Player p = Player("Hero", 60, 14, 4);
 
-    int stage = 1;
-
-    while(p.isAlive()){
+    for(int stage = 1; stage <= 10; stage++){
         cout << "\n==== STAGE " << stage << " ====\n";
 
-        Monster m = makeMonster(stage);
-        battle(p,m,rng);
-
+        Monster m = makeMonster(stage, rng);
+        battle(p, m, rng);
         if(!p.isAlive()) break;
 
         chooseReward(p,rng);
-        stage++;
     }
 
     cout << "\n=== 게임종료 ===\n";
-    cout << "클리어한 스테이지: " << stage-1 << endl;
 
     return 0; 
 }
