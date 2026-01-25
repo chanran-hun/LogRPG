@@ -4,7 +4,15 @@
 #include <algorithm>    //max
 #include <vector>
 #include <random>
+#include <string>
 using namespace std;
+
+namespace Balance {
+    constexpr double PLAYER_CRIT  = 0.20;
+    constexpr double PLAYER_DODGE = 0.10;
+    constexpr double MONSTER_CRIT = 0.20;
+    constexpr double MONSTER_DODGE= 0.10;
+}
 
 class Player{ 
     string name; 
@@ -133,22 +141,12 @@ bool rollChance(mt19937& rng, double p){
     return d(rng);
 }
 
-bool isCritical(mt19937& rng){
-    static bernoulli_distribution crit(0.20);
-    return crit(rng);
-}
-
-bool isDodge(mt19937& rng){
-    static bernoulli_distribution dodge(0.10);
-    return dodge(rng);
-}
-
 void battle(Player &p, Monster &m, mt19937& rng){
     while(p.isAlive() && m.isAlive()){
-        if(isDodge(rng)){
+        if(rollChance(rng, Balance::MONSTER_DODGE)){
             cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
         } else {
-            bool critP = isCritical(rng);
+            bool critP = rollChance(rng, Balance::PLAYER_CRIT);
             int dmgP = max(1,p.getAtk()-m.getDef());
             if(critP)dmgP *= 2;
                 
@@ -158,10 +156,10 @@ void battle(Player &p, Monster &m, mt19937& rng){
         
 
         if(m.isAlive()){
-            if(isDodge(rng)){
+            if(rollChance(rng, Balance::PLAYER_DODGE)){
                 cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
             } else {
-                bool critM = isCritical(rng);
+                bool critM = rollChance(rng, Balance::MONSTER_CRIT);
                 int dmgM = max(1, m.getAtk()-p.getDef());
                 if(critM)dmgM *= 2;
                 
@@ -184,17 +182,24 @@ void battle(Player &p, Monster &m, mt19937& rng){
     }
 }
 
-function rewardText(int rewardIndex) -> string:
-    switch rewardIndex:
+string rewardText(int rewardIndex) {
+    switch (rewardIndex){
         case 0: return "공격력 +1";
         case 1: return "방어력 +1";
         case 2: return "최대 체력 +5";
+        default: return "알 수 없는 보상";
+    }
+        
+}
 
-function applyReward(Player& p, int rewardText):
-    switch rewardText:
+void applyReward(Player& p, int rewardText){
+    switch (rewardText) {
         case 0: p.increaseAtk(); break;
         case 1: p.increaseDef(); break;
-        case 2: p.increaseHp(); break;
+        case 2: p.increaseMaxHp(); break;
+    }
+        
+}
 
 void chooseReward(Player& p, mt19937& rng){
     // 1) 보상 후보 인덱스 목록
