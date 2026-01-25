@@ -10,6 +10,9 @@ namespace Balance {
     constexpr double PLAYER_DODGE = 0.10;
     constexpr double MONSTER_CRIT = 0.20;
     constexpr double MONSTER_DODGE= 0.10;
+    constexpr int MONSTER_HP_SCALE = 3;
+    constexpr int MONSTER_ATK_SCALE = 2;
+    constexpr int MONSTER_DEF_SCALE = 3;
 }
 
 class Player{ 
@@ -140,47 +143,6 @@ bool rollChance(mt19937& rng, double p){
     return d(rng);
 }
 
-void battle(Player &p, Monster &m, mt19937& rng){
-    while(p.isAlive() && m.isAlive()){
-        if(rollChance(rng, Balance::MONSTER_DODGE)){
-            cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
-        } else {
-            bool critP = rollChance(rng, Balance::PLAYER_CRIT);
-            int dmgP = max(1,p.getAtk()-m.getDef());
-            if(critP)dmgP *= 2;
-                
-            cout << (critP ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmgP << "의 피해를 입혔습니다." << endl;
-            m.takeDamage(dmgP);
-        }
-        
-
-        if(m.isAlive()){
-            if(rollChance(rng, Balance::PLAYER_DODGE)){
-                cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
-            } else {
-                bool critM = rollChance(rng, Balance::MONSTER_CRIT);
-                int dmgM = max(1, m.getAtk()-p.getDef());
-                if(critM)dmgM *= 2;
-                
-                cout << (critM ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmgM << "의 피해를 입혔습니다." << endl;
-                p.takeDamage(dmgM);
-            }
-            
-        }
-        cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
-    }
-
-    if(p.isAlive()){
-        cout << "승리하셨습니다." << endl;
-
-        int reward = 10; 
-        cout << "경험치 +" << reward << "!" << endl;
-        p.gainEXP(reward);
-    } else {
-        cout << "패배하셨습니다." << endl;
-    }
-}
-
 string rewardText(int rewardIndex) {
     switch (rewardIndex){
         case 0: return "공격력 +1";
@@ -238,6 +200,49 @@ void chooseReward(Player& p, mt19937& rng){
     cout << "[STAT] ATK:" << p.getAtk() << " DEF:" << p.getDef() << " HP:" << p.getHp() << endl;
 }
 
+void battle(Player &p, Monster &m, mt19937& rng){
+    while(p.isAlive() && m.isAlive()){
+        if(rollChance(rng, Balance::MONSTER_DODGE)){
+            cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
+        } else {
+            bool critP = rollChance(rng, Balance::PLAYER_CRIT);
+            int dmgP = max(1,p.getAtk()-m.getDef());
+            if(critP)dmgP *= 2;
+                
+            cout << (critP ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmgP << "의 피해를 입혔습니다." << endl;
+            m.takeDamage(dmgP);
+        }
+        
+
+        if(m.isAlive()){
+            if(rollChance(rng, Balance::PLAYER_DODGE)){
+                cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
+            } else {
+                bool critM = rollChance(rng, Balance::MONSTER_CRIT);
+                int dmgM = max(1, m.getAtk()-p.getDef());
+                if(critM)dmgM *= 2;
+                
+                cout << (critM ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmgM << "의 피해를 입혔습니다." << endl;
+                p.takeDamage(dmgM);
+            }
+            
+        }
+        cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
+    }
+
+    if(p.isAlive()){
+        cout << "승리하셨습니다." << endl;
+
+        int reward = 10; 
+        cout << "경험치 +" << reward << "!" << endl;
+
+        p.gainEXP(reward);
+        chooseReward(p,rng);
+    } else {
+        cout << "패배하셨습니다." << endl;
+    }
+}
+
 struct MonsterTemplate{
     string name;
     int baseHp;
@@ -262,18 +267,19 @@ vector<MonsterTemplate> lateMonsters = {
 
 Monster makeMonster(int stage, mt19937& rng){
     // 1)stage에 따라 풀 고르기
-    const vector<MonsterTemplate>* pool = &earlyMonsters;
-    if(stage >= 4 && stage <= 6) pool = &midMonsters;
-    else if (stage >= 7) pool = &lateMonsters;
+    const vector<MonsterTemplate>* pool;
+    if(stage <= 3) pool = &earlyMonsters;
+    else if (stage <= 6) pool = &midMonsters;
+    else pool = &lateMonsters;
 
     // 2)풀에서 랜덤으로 하나 뽑기
     uniform_int_distribution<int> dist(0, (int)pool->size() - 1);
     const MonsterTemplate& t = (*pool)[dist(rng)];
 
     // 3)스테이지 보정
-    int hp = t.baseHp + stage * 3;
-    int atk = t.baseAtk + stage / 2;
-    int def = t.baseDef + stage / 3;
+    int hp = t.baseHp + stage * Balance::MONSTER_HP_SCALE;
+    int atk = t.baseAtk + stage / Balance::MONSTER_ATK_SCALE;
+    int def = t.baseDef + stage / Balance::MONSTER_DEF_SCALE;
 
     // 4) Monster 생성해서 반환
     return Monster(t.name, hp, atk, def);
@@ -290,8 +296,6 @@ int main(){
         Monster m = makeMonster(stage, rng);
         battle(p, m, rng);
         if(!p.isAlive()) break;
-
-        chooseReward(p,rng);
     }
 
     cout << "\n=== 게임종료 ===\n";
