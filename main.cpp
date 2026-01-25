@@ -1,7 +1,7 @@
 ﻿#include <iostream> 
 #include <cstdlib>  //rand, srand
 #include <ctime>    //time
-#include <algorithm>    //max
+#include <algorithm>    //max, shuffle
 #include <vector>
 #include <random>
 #include <string>
@@ -137,6 +137,7 @@ public:
 };
 
 bool rollChance(mt19937& rng, double p){
+    p = clamp(p, 0.0, 1.0); //안전장치
     bernoulli_distribution d(p);
     return d(rng);
 }
@@ -192,11 +193,12 @@ string rewardText(int rewardIndex) {
         
 }
 
-void applyReward(Player& p, int rewardText){
-    switch (rewardText) {
+void applyReward(Player& p, int rewardIndex){
+    switch (rewardIndex) {
         case 0: p.increaseAtk(); break;
         case 1: p.increaseDef(); break;
         case 2: p.increaseMaxHp(); break;
+        default: break;
     }
         
 }
@@ -247,8 +249,7 @@ Monster makeMonster(int stage){
 }
 
 int main(){ 
-    srand(time(nullptr));
-    mt19937 rng;
+    mt19937 rng(random_device{}());
 
     Player p = Player("Hero", 60, 14, 4);
 
