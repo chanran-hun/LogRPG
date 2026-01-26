@@ -199,7 +199,7 @@ void chooseReward(Player& p, mt19937& rng){
     } else if (choice == 2 ){
         chosen = pick2;
     } else {
-        cout << "잘못된 번호입니다. 기본값으로 1번 선택지를 선택하겠습니다" << endl;
+        cout << "잘못된 번호입니다. 기본값으로 1번 선택지를 선택하겠습니다\n"; 
         chosen = pick1;
     }
 
@@ -211,6 +211,7 @@ void chooseReward(Player& p, mt19937& rng){
 
 void battle(Player &p, Monster &m, mt19937& rng){
     while(p.isAlive() && m.isAlive()){
+        cout << "----\n";
         if(rollChance(rng, Balance::MONSTER_DODGE)){
             cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
         } else {
@@ -274,12 +275,19 @@ vector<MonsterTemplate> lateMonsters = {
     {"스켈레톤", 34, 12, 4}
 };
 
+vector<MonsterTemplate> bossMonsters = {
+    {"케렐라", 50, 15, 5},
+    {"케바풀", 55, 8, 10}
+};
+
 Monster makeMonster(int stage, mt19937& rng){
     // 1)stage에 따라 풀 고르기
     const vector<MonsterTemplate>* pool;
     if(stage <= 3) pool = &earlyMonsters;
     else if (stage <= 6) pool = &midMonsters;
     else pool = &lateMonsters;
+
+    if(stage % 5 == 0) pool = &bossMonsters;
 
     // 2)풀에서 랜덤으로 하나 뽑기
     uniform_int_distribution<int> dist(0, (int)pool->size() - 1);
