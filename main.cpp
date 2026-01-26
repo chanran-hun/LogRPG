@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include <string>
+#include <limits>
 using namespace std;
 
 namespace Balance {
@@ -11,8 +12,8 @@ namespace Balance {
     constexpr double MONSTER_CRIT = 0.20;
     constexpr double MONSTER_DODGE= 0.10;
     constexpr int MONSTER_HP_SCALE = 3;
-    constexpr int MONSTER_ATK_SCALE = 2;
-    constexpr int MONSTER_DEF_SCALE = 3;
+    constexpr int MONSTER_ATK_DIV = 2;
+    constexpr int MONSTER_DEF_DIV = 3;
 }
 
 class Player{ 
@@ -183,6 +184,14 @@ void chooseReward(Player& p, mt19937& rng){
     int choice = 0;
     cin >> choice;
 
+    //잘못된 입력의 경우
+    if(cin.fail()){
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "숫자만 입력해 주세요. 기본값으로 1번을 선택합니다.\n";
+        choice = 1;
+    }
+
     // 6) choice를 실제 보상 인덱스로 변환
     int chosen = 0;
     if (choice == 1) {
@@ -190,7 +199,7 @@ void chooseReward(Player& p, mt19937& rng){
     } else if (choice == 2 ){
         chosen = pick2;
     } else {
-        cout << "잘못된 입력입니다. 기본값으로 1번 선택지를 선택하겠습니다" << endl;
+        cout << "잘못된 번호입니다. 기본값으로 1번 선택지를 선택하겠습니다" << endl;
         chosen = pick1;
     }
 
@@ -278,8 +287,8 @@ Monster makeMonster(int stage, mt19937& rng){
 
     // 3)스테이지 보정
     int hp = t.baseHp + stage * Balance::MONSTER_HP_SCALE;
-    int atk = t.baseAtk + stage / Balance::MONSTER_ATK_SCALE;
-    int def = t.baseDef + stage / Balance::MONSTER_DEF_SCALE;
+    int atk = t.baseAtk + stage / Balance::MONSTER_ATK_DIV;
+    int def = t.baseDef + stage / Balance::MONSTER_DEF_DIV;
 
     // 4) Monster 생성해서 반환
     return Monster(t.name, hp, atk, def);
