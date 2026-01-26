@@ -14,6 +14,9 @@ namespace Balance {
     constexpr int MONSTER_HP_SCALE = 3;
     constexpr int MONSTER_ATK_DIV = 2;
     constexpr int MONSTER_DEF_DIV = 3;
+    constexpr int BOSSMONSTER_HP_SCALE = 4;
+    constexpr int BOSSMONSTER_ATK_DIV = 2;
+    constexpr int BOSSMONSTER_DEF_DIV = 2;
 }
 
 class Player{ 
@@ -283,21 +286,33 @@ vector<MonsterTemplate> bossMonsters = {
 Monster makeMonster(int stage, mt19937& rng){
     // 1)stage에 따라 풀 고르기
     const vector<MonsterTemplate>* pool;
-    if(stage <= 3) pool = &earlyMonsters;
-    else if (stage <= 6) pool = &midMonsters;
-    else pool = &lateMonsters;
-
-    if(stage % 5 == 0) pool = &bossMonsters;
+    if(stage >= 5 && stage % 5 == 0 && !bossMonsters.empty()) {
+        pool = &bossMonsters;
+    } else if(stage <= 3) {
+        pool = &earlyMonsters;
+    } else if (stage <= 6) {
+        pool = &midMonsters;
+    } else {
+        pool = &lateMonsters;
+    }
+    
 
     // 2)풀에서 랜덤으로 하나 뽑기
     uniform_int_distribution<int> dist(0, (int)pool->size() - 1);
     const MonsterTemplate& t = (*pool)[dist(rng)];
 
     // 3)스테이지 보정
-    int hp = t.baseHp + stage * Balance::MONSTER_HP_SCALE;
-    int atk = t.baseAtk + stage / Balance::MONSTER_ATK_DIV;
-    int def = t.baseDef + stage / Balance::MONSTER_DEF_DIV;
-
+    int hp, atk, def = 0;
+    if(pool == &bossMonsters){
+        hp = t.baseHp + stage * Balance::BOSSMONSTER_HP_SCALE;
+        atk = t.baseAtk + stage / Balance::BOSSMONSTER_ATK_DIV;
+        def = t.baseDef + stage / Balance::BOSSMONSTER_DEF_DIV;
+    } else {
+        hp = t.baseHp + stage * Balance::MONSTER_HP_SCALE;
+        atk = t.baseAtk + stage / Balance::MONSTER_ATK_DIV;
+        def = t.baseDef + stage / Balance::MONSTER_DEF_DIV;
+    }
+    
     // 4) Monster 생성해서 반환
     return Monster(t.name, hp, atk, def);
 }
