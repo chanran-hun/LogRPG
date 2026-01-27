@@ -6,6 +6,8 @@
 #include <limits>
 using namespace std;
 
+bool DEBUG_MODE = true;
+
 namespace Balance {
     constexpr double PLAYER_CRIT  = 0.20;
     constexpr double PLAYER_DODGE = 0.10;
@@ -314,7 +316,10 @@ Monster makeMonster(int stage, mt19937& rng){
     }
     
     // 4) Monster 생성해서 반환
-    cout << "[DEBUG] stage " << stage << " -> " << t.name << (pool == &bossMonsters ? " (Boss)\n" : "\n");
+    if(DEBUG_MODE){
+        cout << "[DEBUG] stage " << stage << " -> " << t.name << (pool == &bossMonsters ? " (Boss)\n" : "\n");
+    }
+    
     return Monster(t.name, hp, atk, def);
 }
 
@@ -322,6 +327,21 @@ int main(){
     mt19937 rng(random_device{}());
 
     Player p = Player("Hero", 60, 14, 4);
+
+    cout << "모드를 선택하세요:\n";
+    cout << "1) 플레이 모드\n";
+    cout << "2) 개발 모드\n>" ;
+
+    int mode;
+    cin >> mode;
+
+    if(mode == 2){
+        DEBUG_MODE = true;
+        cout << "[개발 모드 활성화]\n";
+    } else {
+        DEBUG_MODE = false;
+        cout << "[플레이 모드 활성화]\n";
+    }
 
     for(int stage = 1; stage <= 10; stage++){
         cout << "\n==== STAGE " << stage << " ====\n";
