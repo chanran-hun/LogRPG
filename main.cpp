@@ -302,7 +302,7 @@ Monster makeMonster(int stage, mt19937& rng){
     const MonsterTemplate& t = (*pool)[dist(rng)];
 
     // 3)스테이지 보정
-    int hp, atk, def = 0;
+    int hp = 0, atk = 0, def = 0;
     if(pool == &bossMonsters){
         hp = t.baseHp + stage * Balance::BOSSMONSTER_HP_SCALE;
         atk = t.baseAtk + stage / Balance::BOSSMONSTER_ATK_DIV;
@@ -314,6 +314,7 @@ Monster makeMonster(int stage, mt19937& rng){
     }
     
     // 4) Monster 생성해서 반환
+    cout << "[DEBUG] stage " << stage << " -> " << t.name << (pool == &bossMonsters ? " (Boss)\n" : "\n");
     return Monster(t.name, hp, atk, def);
 }
 
