@@ -12,6 +12,11 @@ bool DEBUG_MODE = true;
 constexpr int BOSS_INTRO_DELAY_MS = 1000;
 constexpr int BATTLE_DELAY_MS = 1000;
 
+void battleDelay(){
+    if (!DEBUG_MODE)
+        this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
+}
+
 namespace Balance {
     constexpr double PLAYER_CRIT  = 0.20;
     constexpr double PLAYER_DODGE = 0.10;
@@ -295,6 +300,7 @@ void showBossIntro(int stage, const Monster& m){
     cout << "         STAGE " << stage << "\n";
     this_thread::sleep_for(chrono::milliseconds(BOSS_INTRO_DELAY_MS));
     cout << "      " << m.getName() << " 출현!\n";
+    this_thread::sleep_for(chrono::milliseconds(BOSS_INTRO_DELAY_MS));
     cout << "==============================\n";
     if(DEBUG_MODE){
         cout << "HP: " << m.getHp() << "  ATK: " << m.getAtk() << "  DEF: " << m.getDef() << "\n\n";
@@ -308,7 +314,6 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
         cout << "----\n";
         if(rollChance(rng, Balance::MONSTER_DODGE)){
             cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
-            this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
         } else {
             bool critP = rollChance(rng, Balance::PLAYER_CRIT);
             int dmgP = max(1,p.getAtk()-m.getDef());
@@ -316,14 +321,12 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
                 
             cout << (critP ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmgP << "의 피해를 입혔습니다." << endl;
             m.takeDamage(dmgP);
-            this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
         }
-        
+        battleDelay();
 
         if(m.isAlive()){
             if(rollChance(rng, Balance::PLAYER_DODGE)){
                 cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
-                this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
             } else {
                 bool critM = rollChance(rng, Balance::MONSTER_CRIT);
                 int dmgM = max(1, m.getAtk()-p.getDef());
@@ -331,12 +334,11 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
                 
                 cout << (critM ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmgM << "의 피해를 입혔습니다." << endl;
                 p.takeDamage(dmgM);
-                this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
             }
-            
+            battleDelay();
         }
         cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
-        this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
+        battleDelay();
     }
 
     if(p.isAlive()){
