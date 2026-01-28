@@ -201,7 +201,8 @@ void chooseReward(Player& p, mt19937& rng, int rewardCount){
         typePrint("\n보상을 선택해주세요\n", 20);
     }
     for (int i = 0; i < rewardCount; i++){
-        cout << i+1 << ")" << rewardText(idx[i]) << "\n";
+        cout << i+1 << ") " << rewardText(idx[i]) << "\n";
+        battleDelay();
     }
     cout << "\n>";
     // 4) 사용자 입력 받기
