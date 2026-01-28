@@ -11,7 +11,18 @@ using namespace std;
 bool DEBUG_MODE = true;
 constexpr int BOSS_INTRO_DELAY_MS = 1000;
 constexpr int BATTLE_DELAY_MS = 1000;
-
+//타자치는 느낌 삽입
+void typePrint(const string& s, int msPerChar){
+    if (DEBUG_MODE) {
+        cout << s;
+        return;
+    }
+    for(char c : s){
+        cout << c << flush;
+        this_thread::sleep_for(chrono::milliseconds(msPerChar));
+    }
+}
+//전투중 지연 삽입
 void battleDelay(){
     if (!DEBUG_MODE)
         this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
@@ -338,7 +349,7 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
         p.gainEXP(reward);
         //보스 특별 보상
         if(isBossStage(stage)){
-            cout << "🎁 보스 보상! 더 많은 선택지 중 하나를 고르세요!\n";
+            typePrint("🎁 보스 보상! 더 많은 선택지 중 하나를 고르세요!\n", 25);
             chooseReward(p,rng,3);
         } else {
             chooseReward(p,rng,2);
