@@ -195,11 +195,15 @@ void chooseReward(Player& p, mt19937& rng, int rewardCount){
     // 2) 인덱스 랜덤하게 섞기
     shuffle(idx.begin(), idx.end() ,rng);
     // 3) 화면에 선택 목록 추가
-    cout << "===보상을 선택하세요===\n";
+    if(rewardCount==3){
+        typePrint("\n✨ 보스 전용 보상을 선택해주세요 ✨\n", 25);
+    } else {
+        typePrint("\n보상을 선택해주세요\n", 20);
+    }
     for (int i = 0; i < rewardCount; i++){
         cout << i+1 << ")" << rewardText(idx[i]) << "\n";
     }
-    cout << ">";
+    cout << "\n>";
     // 4) 사용자 입력 받기
     int choice = 0;
     cin >> choice;
