@@ -338,7 +338,6 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
             battleDelay();
         }
         cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
-        battleDelay();
     }
 
     if(p.isAlive()){
