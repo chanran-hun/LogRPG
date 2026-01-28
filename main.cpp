@@ -178,45 +178,35 @@ void applyReward(Player& p, int rewardIndex){
         
 }
 
-void chooseReward(Player& p, mt19937& rng){
+void chooseReward(Player& p, mt19937& rng, int rewardCount){
     // 1) 보상 후보 인덱스 목록
     vector<int> idx = {0,1,2};
-
     // 2) 인덱스 랜덤하게 섞기
     shuffle(idx.begin(), idx.end() ,rng);
-    
-    // 3) 섞인것 중 앞 두가지 선택
-    int pick1 = idx[0];
-    int pick2 = idx[1]; 
-
-    // 4) 화면에 선택 목록 추가
+    // 3) 화면에 선택 목록 추가
     cout << "===보상을 선택하세요===\n";
-    cout << "1) " << rewardText(pick1) << "\n";
-    cout << "2) " << rewardText(pick2) << "\n> ";
-
-    // 5) 사용자 입력 받기
+    for (int i = 0; i < rewardCount; i++){
+        cout << i+1 << ")" << rewardText(idx[i]) << "\n";
+    }
+    cout << ">";
+    // 4) 사용자 입력 받기
     int choice = 0;
     cin >> choice;
-
-    //잘못된 입력의 경우
-    if(cin.fail()){
+    // 4)-1 입력 실패 처리
+    if (cin.fail()) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "숫자만 입력해 주세요. 기본값으로 1번을 선택합니다.\n";
+        cout << "숫자만 입력해주세요. 1번을 선택합니다.\n";
         choice = 1;
     }
-
-    // 6) choice를 실제 보상 인덱스로 변환
+    // 5) 사용자 입력 처리
     int chosen = 0;
-    if (choice == 1) {
-        chosen = pick1;
-    } else if (choice == 2 ){
-        chosen = pick2;
+    if(choice >= 1 && choice <= rewardCount){
+        chosen = idx[choice-1];
     } else {
-        cout << "잘못된 번호입니다. 기본값으로 1번 선택지를 선택하겠습니다\n"; 
-        chosen = pick1;
+        cout << "잘못된 입력입니다. 1번을 선택합니다.\n";
+        chosen = idx[0];
     }
-
     // 7) chosen에 따라 효과 적용
     applyReward(p,chosen);
 
@@ -308,7 +298,7 @@ void showBossIntro(int stage, const Monster& m){
         cout << "\n";
     }
 }
-
+//전투진행
 void battle(Player &p, Monster &m, mt19937& rng, int stage){
     while(p.isAlive() && m.isAlive()){
         cout << "----\n";
@@ -339,19 +329,20 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
         }
         cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
     }
-
+    //전투 종료 이후
     if(p.isAlive()){
         cout << "승리하셨습니다." << endl;
-
-        if(isBossStage(stage)){
-            cout << "🏆 보스를 처치했습니다! 엄청난 승리입니다!\n";
-        }
-
+        //경험치 증가
         int reward = 10; 
         cout << "경험치 +" << reward << "!" << endl;
-
         p.gainEXP(reward);
-        chooseReward(p,rng);
+        //보스 특별 보상
+        if(isBossStage(stage)){
+            cout << "🎁 보스 보상! 더 많은 선택지 중 하나를 고르세요!\n";
+            chooseReward(p,rng,3);
+        } else {
+            chooseReward(p,rng,2);
+        }
     } else {
         cout << "패배하셨습니다." << endl;
     }
