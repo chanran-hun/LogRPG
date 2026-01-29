@@ -27,7 +27,17 @@ void battleDelay(){
     if (!DEBUG_MODE)
         this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
 }
-
+//체력바 표시
+string makeHpBar(int current, int maxHp, int barWidth = 12){
+    int filled = (current * barWidth) / maxHp;
+    string bar = "[";
+    for (int i = 0; i < barWidth; i++){
+        bar += (i < filled ? "█" : "-");
+    }
+    bar += "]";
+    return bar;
+}
+//멤버들간의 밸런스를 맞추기 위한 체력 성장, 치명타율, 방어력 성장, 공격력 성장 등의 데이터 상수들
 namespace Balance {
     constexpr double PLAYER_CRIT  = 0.20;
     constexpr double PLAYER_DODGE = 0.10;
@@ -74,6 +84,10 @@ public:
 
     int getHp()const{
         return hp;
+    }
+
+    int getMaxHp()const{
+        return maxHp;
     }
 
     void takeDamage(int dmg){
@@ -152,6 +166,10 @@ public:
 
     int getHp()const{
         return hp;
+    }
+    //몬스터의 최대 체력 반환
+    int getMaxHp()const{
+        return maxHp;
     }
 
     bool isAlive()const{
@@ -364,7 +382,9 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
         }
         //4) 턴 증가 시키기
         turn++;
-        cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
+        //체력바와 체력 상태 출력
+        cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << p.getMaxHp() << " " << makeHpBar(p.getHp(), p.getMaxHp()) << '\n';
+        cout << "[HP] " << m.getName() << ": " << m.getHp() << " / " << m.getMaxHp() << " " << makeHpBar(m.getHp(), m.getMaxHp()) << '\n';
     }
     //전투 종료 이후
     if(p.isAlive()){
