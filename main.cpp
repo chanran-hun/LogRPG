@@ -322,13 +322,21 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
         //2) 보스인지, 그리고 특정 턴인지 체크하기
         bool isBoss = isBossStage(stage);
         bool isPowerTurn = isBoss && (turn % 3 == 0);
+        //방어턴 변수도 만들기
+        bool isGuardTurn = isBoss && (turn % 2 == 0);
         //전투시작
         cout << "----\n";
         if(rollChance(rng, Balance::MONSTER_DODGE)){
             cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
         } else {
             bool critP = rollChance(rng, Balance::PLAYER_CRIT);
-            int dmgP = max(1,p.getAtk()-m.getDef());
+            //방어턴일 때 방어력 조정
+            int effectiveDef = m.getDef();
+            if(isGuardTurn){
+                effectiveDef += 3;
+                typePrint("🛡️ 보스가 방어 자세를 취합니다! 방어력이 상승했습니다!\n", 20);
+            }
+            int dmgP = max(1,p.getAtk()-effectiveDef);
             if(critP)dmgP *= 2;    
             cout << (critP ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmgP << "의 피해를 입혔습니다." << endl;
             m.takeDamage(dmgP);
