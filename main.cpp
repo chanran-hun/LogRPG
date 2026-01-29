@@ -316,26 +316,37 @@ void showBossIntro(int stage, const Monster& m){
 }
 //전투진행
 void battle(Player &p, Monster &m, mt19937& rng, int stage){
+    //1) 턴 카운트하기
+    int turn = 1;
     while(p.isAlive() && m.isAlive()){
+        //2) 보스인지, 그리고 특정 턴인지 체크하기
+        bool isBoss = isBossStage(stage);
+        bool isPowerTurn = isBoss && (turn % 3 == 0);
+        //전투시작
         cout << "----\n";
         if(rollChance(rng, Balance::MONSTER_DODGE)){
             cout << "💨 " << m.getName() << "이(가) " << p.getName() << "의 공격을 회피했습니다!" << endl;
         } else {
             bool critP = rollChance(rng, Balance::PLAYER_CRIT);
             int dmgP = max(1,p.getAtk()-m.getDef());
-            if(critP)dmgP *= 2;
-                
+            if(critP)dmgP *= 2;    
             cout << (critP ? "★ 치명타! " : "") << p.getName() << "이(가) " << dmgP << "의 피해를 입혔습니다." << endl;
             m.takeDamage(dmgP);
         }
         battleDelay();
-
+        //몬스터 턴
         if(m.isAlive()){
             if(rollChance(rng, Balance::PLAYER_DODGE)){
                 cout << "💨 " << p.getName() << "이(가) " << m.getName() << "의 공격을 회피했습니다!" << endl;
             } else {
                 bool critM = rollChance(rng, Balance::MONSTER_CRIT);
                 int dmgM = max(1, m.getAtk()-p.getDef());
+                //3) 조건 만족할 때 데미지 계산 식 바꾸기
+                if(isPowerTurn){
+                    dmgM = dmgM * 2;
+                    typePrint("💥 보스가 강력한 공격을 준비합니다!\n", 20);
+                }
+                //치명타 적용
                 if(critM)dmgM *= 2;
                 
                 cout << (critM ? "★ 치명타! " : "") << m.getName() << "이(가) " << dmgM << "의 피해를 입혔습니다." << endl;
@@ -343,6 +354,8 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
             }
             battleDelay();
         }
+        //4) 턴 증가 시키기
+        turn++;
         cout << "[HP] " << p.getName() << ": " << p.getHp() << " / " << m.getName() << ": " << m.getHp() << endl;
     }
     //전투 종료 이후
