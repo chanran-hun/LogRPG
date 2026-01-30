@@ -97,16 +97,21 @@ public:
     int getMaxHp()const{
         return maxHp;
     }
-    
+    //골드 량 반환
     int getGold()const{
         return gold;
     }
     //골드 획득
     void gainGold(int amount){
-        gold += amount;
+        //음수값 방지
+        if( amount > 0){
+            gold += amount;
+        }
     }
     //골드 사용
     bool spendGold(int amount){
+        //음수값 방지
+        if(amount <= 0) return true;
         if(amount > gold){
             return false;
         }
@@ -419,6 +424,10 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
         int reward = 10; 
         cout << "경험치 +" << reward << "!" << endl;
         p.gainEXP(reward);
+        //골드 증가
+        int goldReward = isBossStage(stage) ? 30 : 10;
+        p.gainGold(goldReward);
+        cout << "골드 +" << goldReward << "(보유: " << p.getGold() << ")\n";
         //보스 특별 보상
         if(isBossStage(stage)){
             typePrint("🎁 보스 보상! 더 많은 선택지 중 하나를 고르세요!\n", 25);
