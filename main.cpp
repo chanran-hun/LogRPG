@@ -29,7 +29,13 @@ void battleDelay(){
 }
 //체력바 표시
 string makeHpBar(int current, int maxHp, int barWidth = 12){
+    //0으로 나누기 방지
+    if(maxHp <= 0) return "[------------]";
+    //current값 보정
+    current = clamp(current, 0, maxHp);
     int filled = (current * barWidth) / maxHp;
+    //살아 있을 때 0칸이 되는것 방지
+    if (current > 0 && filled == 0) filled = 1;
     string bar = "[";
     for (int i = 0; i < barWidth; i++){
         bar += (i < filled ? "█" : "-");
@@ -213,6 +219,8 @@ void chooseReward(Player& p, mt19937& rng, int rewardCount){
     // 2) 인덱스 랜덤하게 섞기
     shuffle(idx.begin(), idx.end() ,rng);
     // 3) 화면에 선택 목록 추가
+    //rewardCount값 범위 이탈 방지
+    rewardCount = clamp(rewardCount,1,(int)idx.size());
     if(rewardCount==3){
         typePrint("\n✨ 보스 전용 보상을 선택해주세요 ✨\n", 25);
     } else {
