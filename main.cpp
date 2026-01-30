@@ -64,7 +64,8 @@ class Player{
     int maxHp; 
     int atk; 
     int def; 
-    int exp; 
+    int exp;
+    int gold;
 public: 
     Player(string name, int maxHp, int atk, int def): 
     name(name), 
@@ -73,7 +74,8 @@ public:
     maxHp(maxHp), 
     atk(atk), 
     def(def),
-    exp(0)
+    exp(0),
+    gold(0)
     {} 
     
     int getAtk()const{
@@ -95,7 +97,23 @@ public:
     int getMaxHp()const{
         return maxHp;
     }
-
+    
+    int getGold()const{
+        return gold;
+    }
+    //골드 획득
+    void gainGold(int amount){
+        gold += amount;
+    }
+    //골드 사용
+    bool spendGold(int amount){
+        if(amount > gold){
+            return false;
+        }
+        gold -= amount;
+        return true;
+    }
+    //데미지를 받을 때 
     void takeDamage(int dmg){
         hp -= dmg;
         if(hp < 0) hp = 0;
