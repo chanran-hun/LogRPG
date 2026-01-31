@@ -123,7 +123,11 @@ public:
         hp -= dmg;
         if(hp < 0) hp = 0;
     }
-
+    //체력 회복
+    void heal(int amount){
+        if(amount <= 0) return;
+        hp = min(maxHp, hp + amount);
+    }
     bool isAlive()const{
         return hp > 0;
     }
