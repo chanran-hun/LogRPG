@@ -56,16 +56,21 @@ namespace Balance {
     constexpr int BOSSMONSTER_ATK_DIV = 2;
     constexpr int BOSSMONSTER_DEF_DIV = 2;
 }
-
+//상점 품목
+namespace Shop {
+    constexpr int POTION_HEAL = 20;     //포션의 회복량
+    constexpr int POTION_PRICE = 15;    //포션의 가격
+}
+//플레이어
 class Player{ 
-    string name; 
-    int level; 
-    int hp; 
-    int maxHp; 
-    int atk; 
-    int def; 
-    int exp;
-    int gold;
+    string name; //플레이어의 캐릭터 이름
+    int level;   //플레이어 레벨
+    int hp;      //플레이어 hp
+    int maxHp;   //플레이어 최대체력
+    int atk;     //플레이어 공격력
+    int def;     //플레이어 방어력
+    int exp;     //플레이어 경험치
+    int gold;    //플레이어 골드 보유량
 public: 
     Player(string name, int maxHp, int atk, int def): 
     name(name), 
