@@ -155,17 +155,19 @@ public:
             cout << "\n=== 레벨 업! LV." << level << " ===\n" << endl;
         }
     }
-    
-    void printStatus(){ 
-        cout << "이름: " << name << " 체력: " << hp << " 공격력: " << atk << " 경험치: " << exp << endl; 
-        if(isAlive()){
-            cout << "살아계시는군요" << endl;
-        } else {
-            cout << "ㅉㅉ" << endl;
-        }
+    //총 상태 출력
+    void printSummary()const{
+        cout << "\n=== PLAYER STATUS ===\n";
+        cout << "이름: " << name << "\n";
+        cout << "LV : " << level << "\n";
+        cout << "HP : " << hp << " / " << maxHp << " " << makeHpBar(hp, maxHp) << "\n";
+        cout << "ATK: " << atk << "  DEF: " << def << "\n";
+        cout << "EXP: " << exp << " / 20\n";
+        cout << "GOLD: " << gold << "\n";
+        cout << "=====================\n";
     }
 }; 
-
+//몬스터
 class Monster{ 
     string name;  
     int hp; 
@@ -363,6 +365,27 @@ void showBossIntro(int stage, const Monster& m){
         cout << "\n";
     }
 }
+//메뉴출력
+int stageMenuInput(){
+    //선택지 제시
+    cout << "\n다음 행동을 선택하세요:\n";
+    cout << "1) 다음 스테이지로\n";
+    cout << "2) 상점\n";
+    cout << "3) 상태 보기\n";
+    cout << "0) 게임 종료\n> ";
+    //선택 입력
+    int choice;
+    cin >> choice;
+    //입력 실패시
+    if (cin.fail()){
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "숫자만 입력해주세요. 기본값으로 1번(다음 스테이지)을 선택합니다.\n";
+        return 1;
+    }
+    //선택 반환
+    return choice;
+}
 //전투진행
 void battle(Player &p, Monster &m, mt19937& rng, int stage){
     //1) 턴 카운트하기
@@ -427,7 +450,7 @@ void battle(Player &p, Monster &m, mt19937& rng, int stage){
         //골드 증가
         int goldReward = isBossStage(stage) ? 30 : 10;
         p.gainGold(goldReward);
-        cout << "골드 +" << goldReward << "(보유: " << p.getGold() << ")\n";
+        cout << "골드 +" << goldReward << " (보유: " << p.getGold() << ")\n";
         //보스 특별 보상
         if(isBossStage(stage)){
             typePrint("🎁 보스 보상! 더 많은 선택지 중 하나를 고르세요!\n", 25);
@@ -472,6 +495,24 @@ int main(){
 
         battle(p, m, rng, stage);
         if(!p.isAlive()) break;
+        //스테이지 클리어 후 메뉴
+        while(true){
+            //선택지 제시 + 선택
+            int sel = stageMenuInput();
+            //선택지 적용
+            if(sel == 1){           //다음 스테이지 진행
+                break;  
+            } else if(sel == 2){    //상점으로 이동
+                cout << "\n[상점] 준비중입니다! (다음 단계에서 구현할게요)\n";
+            } else if(sel == 3){    //상태 표시
+                p.printSummary();
+            } else if(sel == 0){    //게임 종료
+                cout << "\n게임을 종료합니다.\n";
+                return 0;
+            } else {
+                cout << "잘못된 입력입니다. 다시 선택해주세요.\n";
+            }
+        }
     }
 
     cout << "\n=== 게임종료 ===\n";
