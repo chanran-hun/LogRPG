@@ -220,6 +220,10 @@ public:
         hp = max(0, hp - dmg);
     }
 };
+//체력 가득 찬 상태 확인
+bool isFullHp(Player& p){
+    return p.getHp() >= p.getMaxHp();
+}
 //상점
 void shop(Player& p){
     while(true){
@@ -244,13 +248,15 @@ void shop(Player& p){
             cout << "상점을 나갑니다\n";
             break;
         } else if(choice == 1)  {           //1 입력시 
-            if(p.getHp() == p.getMaxHp()){  //이미 체력이 모두 차있는 경우
-                cout << p.getName() << " : 지금은 이걸 살 필요가 없는것 같군\n";
+            if(isFullHp(p)){                //이미 체력이 모두 차있는 경우
+                cout << "[상점] 체력이 이미 가득 차있습니다.\n";
+                cout << p.getName() << " : 지금은 이걸 살 필요가 없는것 같군.\n";
                 continue;
             }
             
             if(!p.spendGold(Shop::POTION_PRICE)){   //돈이 모자르는 경우.
-                cout << p.getName() << " : 아직 돈이 모자르는군... 돈을 더 벌오도록 하자..\n";
+                cout << "[상점] 골드가 부족합니다.\n";
+                cout << p.getName() << " : 아직 돈이 모자르는군... 돈을 더 벌어오도록 하자...\n";
                 continue;
             }
 
@@ -264,13 +270,13 @@ void shop(Player& p){
         }
     }
 }
-
+//확률 관리
 bool rollChance(mt19937& rng, double p){
     p = clamp(p, 0.0, 1.0); //안전장치
     bernoulli_distribution d(p);
     return d(rng);
 }
-
+//보상 선택시 나오는 문구 관리
 string rewardText(int rewardIndex) {
     switch (rewardIndex){
         case 0: return "공격력 +1";
@@ -357,7 +363,8 @@ vector<MonsterTemplate> lateMonsters = {
 
 vector<MonsterTemplate> bossMonsters = {
     {"고전파", 50, 15, 5},
-    {"전승의 종소리", 55, 8, 10}
+    {"전승의 종소리", 50, 10, 5},
+    {"상토르", 45, 10, 8}
 };
 
 Monster makeMonster(int stage, mt19937& rng){
