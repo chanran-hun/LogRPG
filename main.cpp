@@ -71,7 +71,9 @@ class Player{
     int def;     //플레이어 방어력
     int exp;     //플레이어 경험치
     int gold;    //플레이어 골드 보유량
+    int potions; //플레이어 포션 보유량
 public: 
+    //생성자
     Player(string name, int maxHp, int atk, int def): 
     name(name), 
     level(1),
@@ -80,7 +82,8 @@ public:
     atk(atk), 
     def(def),
     exp(0),
-    gold(0)
+    gold(0),
+    potions(0)
     {} 
     
     int getAtk()const{
@@ -101,6 +104,22 @@ public:
 
     int getMaxHp()const{
         return maxHp;
+    }
+    //포션 수 반환
+    int getPotions()const{
+        return potions;
+    }
+    //포션 획득
+    void addPotions(int count = 1){
+        if(count > 0) potions += count;
+    }
+    //포션 사용
+    bool usePotions(){
+        if(potions <= 0) return false;  //포션이 없을 때 사용하는 버그 방지
+        if(hp >= maxHp) return false;   //풀피일 때 낭비 방지
+        potions--;
+        heal(Shop::POTION_HEAL);        //회복
+        return true;
     }
     //골드 량 반환
     int getGold()const{
@@ -168,11 +187,12 @@ public:
     void printSummary()const{
         cout << "\n=== PLAYER STATUS ===\n";
         cout << "이름: " << name << "\n";
-        cout << "LV : " << level << "\n";
-        cout << "HP : " << hp << " / " << maxHp << " " << makeHpBar(hp, maxHp) << "\n";
-        cout << "ATK: " << atk << "  DEF: " << def << "\n";
-        cout << "EXP: " << exp << " / 20\n";
-        cout << "GOLD: " << gold << "\n";
+        cout << "레벨: " << level << "\n";
+        cout << "체력: " << hp << " / " << maxHp << " " << makeHpBar(hp, maxHp) << "\n";
+        cout << "공격력: " << atk << "  DEF: " << def << "\n";
+        cout << "경험치: " << exp << " / 20\n";
+        cout << "골드 보유량: " << gold << "\n";
+        cout << "포션 보유량: " << potions << "\n";
         cout << "=====================\n";
     }
 }; 
@@ -248,23 +268,15 @@ void shop(Player& p){
             cout << "상점을 나갑니다\n";
             break;
         } else if(choice == 1)  {           //1 입력시 
-            if(isFullHp(p)){                //이미 체력이 모두 차있는 경우
-                cout << "[상점] 체력이 이미 가득 차있습니다.\n";
-                cout << p.getName() << " : 지금은 이걸 살 필요가 없는것 같군.\n";
-                continue;
-            }
-            
-            if(!p.spendGold(Shop::POTION_PRICE)){   //돈이 모자르는 경우.
+            //돈이 모자르는 경우.
+            if(!p.spendGold(Shop::POTION_PRICE)){   
                 cout << "[상점] 골드가 부족합니다.\n";
                 cout << p.getName() << " : 아직 돈이 모자르는군... 돈을 더 벌어오도록 하자...\n";
                 continue;
             }
-
-            int before = p.getHp();
-            p.heal(Shop::POTION_HEAL);
-            int healed = p.getHp() - before;
-
-            cout << "포션을 사용했습니다! HP +" << healed << " (현재: " << p.getHp() << "/" << p.getMaxHp() << ")\n";
+            //포션 구매
+            p.addPotions(1);
+            cout << "[상점] 포션을 구매했습니다! (보유: " << p.getPotions() << "개)\n";
         } else {
             cout << "잘못된 입력입니다.\n";
         }
@@ -432,6 +444,7 @@ int stageMenuInput(){
     cout << "1) 다음 스테이지로\n";
     cout << "2) 상점\n";
     cout << "3) 상태 보기\n";
+    cout << "4) 포션 사용\n";
     cout << "0) 게임 종료\n> ";
     //선택 입력
     int choice;
@@ -566,7 +579,25 @@ int main(){
                 shop(p);
             } else if(sel == 3){    //상태 표시
                 p.printSummary();
-            } else if(sel == 0){    //게임 종료
+            } else if(sel == 4){
+                if(p.getPotions() <= 0){
+                    cout << p.getName() << ": 지금은 사용할 포션이 없는것 같군...\n";
+                } else if(isFullHp(p)){
+                    cout << p.getName() << ": 지금은 풀피라 포션을 쓸 필요가 없을것 같네 쟁여둬야지.\n";
+                } else  {
+                    int before = p.getHp();
+                    bool ok = p.usePotions();
+                    int healed = p.getHp() - before;
+
+                    if(ok){
+                        cout << p.getName() << ": 포션을 마셨다. HP +" << healed << " (현재: " << p.getHp() << "/" << p.getMaxHp() << ")\n";
+                        cout << p.getName() << ": 포션이 " << p.getPotions() << "개 남아있군.\n";
+                    } else {
+                        //혹시모를 상황을 위한 곳
+                        cout << p.getName() << ": 지금은 포션을 사용할 수 없겠군\n";
+                    }
+                }
+            }else if(sel == 0){    //게임 종료
                 cout << "\n게임을 종료합니다.\n";
                 return 0;
             } else {
