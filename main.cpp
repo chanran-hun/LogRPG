@@ -220,6 +220,50 @@ public:
         hp = max(0, hp - dmg);
     }
 };
+//상점
+void shop(Player& p){
+    while(true){
+        cout << "\n========== 상점 ==========\n";
+        cout << "보유 골드: " << p.getGold() << "\n";
+        cout << "현재 체력: " << p.getHp() << " / " << p.getMaxHp() << " " << makeHpBar(p.getHp(), p.getMaxHp()) << "\n";
+        cout << "--------------------------\n";
+        cout << "1) 포션 구매 (HP +" << Shop::POTION_HEAL << ") - " << Shop::POTION_PRICE << "G\n";
+        cout << "0) 나가기\n> ";
+
+        int choice;
+        cin >> choice;
+        //입력 실패 방어
+        if(cin.fail()){
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "숫자만 입력해주세요.\n";
+            continue;
+        }
+        //입력 처리하기
+        if(choice == 0){                    //0 입력시
+            cout << "상점을 나갑니다\n";
+            break;
+        } else if(choice == 1)  {           //1 입력시 
+            if(p.getHp() == p.getMaxHp()){  //이미 체력이 모두 차있는 경우
+                cout << p.getName() << " : 지금은 이걸 살 필요가 없는것 같군\n";
+                continue;
+            }
+            
+            if(!p.spendGold(Shop::POTION_PRICE)){   //돈이 모자르는 경우.
+                cout << p.getName() << " : 아직 돈이 모자르는군... 돈을 더 벌오도록 하자..\n";
+                continue;
+            }
+
+            int before = p.getHp();
+            p.heal(Shop::POTION_HEAL);
+            int healed = p.getHp() - before;
+
+            cout << "포션을 사용했습니다! HP +" << healed << " (현재: " << p.getHp() << "/" << p.getMaxHp() << ")\n";
+        } else {
+            cout << "잘못된 입력입니다.\n";
+        }
+    }
+}
 
 bool rollChance(mt19937& rng, double p){
     p = clamp(p, 0.0, 1.0); //안전장치
@@ -512,7 +556,7 @@ int main(){
             if(sel == 1){           //다음 스테이지 진행
                 break;  
             } else if(sel == 2){    //상점으로 이동
-                cout << "\n[상점] 준비중입니다! (다음 단계에서 구현할게요)\n";
+                shop(p);
             } else if(sel == 3){    //상태 표시
                 p.printSummary();
             } else if(sel == 0){    //게임 종료
