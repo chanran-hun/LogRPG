@@ -11,7 +11,7 @@ using namespace std;
 bool DEBUG_MODE = true;
 constexpr int BOSS_INTRO_DELAY_MS = 1000;
 constexpr int BATTLE_DELAY_MS = 1000;
-//타자치는 느낌 삽입
+
 void typePrint(const string& s, int msPerChar){
     if (DEBUG_MODE) {
         cout << s;
@@ -113,15 +113,15 @@ public:
     void addPotions(int count = 1){
         if(count > 0) potions += count;
     }
-    //포션 사용
-    bool usePotions(){
-        if(potions <= 0) return false;  //포션이 없을 때 사용하는 버그 방지
-        if(hp >= maxHp) return false;   //풀피일 때 낭비 방지
-        potions--;
-        heal(Shop::POTION_HEAL);        //회복
+
+    bool usePotion(int healAmount){
+        if(potions <= 0) return false;  // 재고 0일때 사용 방지
+        if(hp >= maxHp) return false;   // 풀피일 때 낭비 방지
+        potions--;                      
+        heal(Shop::POTION_HEAL);        
         return true;
     }
-    //골드 량 반환
+    
     int getGold()const{
         return gold;
     }
@@ -155,7 +155,11 @@ public:
     bool isAlive()const{
         return hp > 0;
     }
-    
+    //풀피 확인
+    bool isFullHp(){
+        return getHp() >= getMaxHp();
+    }
+    //공격력 증가
     void increaseAtk(int amount = 1){
         atk += amount;
         cout << "공격력이 +" << amount << " 증가했습니다!\n";
@@ -189,7 +193,7 @@ public:
         cout << "이름: " << name << "\n";
         cout << "레벨: " << level << "\n";
         cout << "체력: " << hp << " / " << maxHp << " " << makeHpBar(hp, maxHp) << "\n";
-        cout << "공격력: " << atk << "  DEF: " << def << "\n";
+        cout << "공격력: " << atk << "  방어력: " << def << "\n";
         cout << "경험치: " << exp << " / 20\n";
         cout << "골드 보유량: " << gold << "\n";
         cout << "포션 보유량: " << potions << "\n";
@@ -240,10 +244,6 @@ public:
         hp = max(0, hp - dmg);
     }
 };
-//체력 가득 찬 상태 확인
-bool isFullHp(Player& p){
-    return p.getHp() >= p.getMaxHp();
-}
 //상점
 void shop(Player& p){
     while(true){
@@ -270,13 +270,12 @@ void shop(Player& p){
         } else if(choice == 1)  {           //1 입력시 
             //돈이 모자르는 경우.
             if(!p.spendGold(Shop::POTION_PRICE)){   
-                cout << "[상점] 골드가 부족합니다.\n";
-                cout << p.getName() << " : 아직 돈이 모자르는군... 돈을 더 벌어오도록 하자...\n";
+                cout << p.getName() << ": 아직 돈이 모자르는군... 돈을 더 벌어오도록 하자...\n";
                 continue;
             }
             //포션 구매
             p.addPotions(1);
-            cout << "[상점] 포션을 구매했습니다! (보유: " << p.getPotions() << "개)\n";
+            cout << p.getName() << ": 포션을 구매했다. 현재 가지고 있는 포션이 " << p.getPotions() << "개다.\n";
         } else {
             cout << "잘못된 입력입니다.\n";
         }
@@ -582,11 +581,11 @@ int main(){
             } else if(sel == 4){
                 if(p.getPotions() <= 0){
                     cout << p.getName() << ": 지금은 사용할 포션이 없는것 같군...\n";
-                } else if(isFullHp(p)){
+                } else if(p.isFullHp()){
                     cout << p.getName() << ": 지금은 풀피라 포션을 쓸 필요가 없을것 같네 쟁여둬야지.\n";
                 } else  {
                     int before = p.getHp();
-                    bool ok = p.usePotions();
+                    bool ok = p.usePotion(Shop::POTION_HEAL);
                     int healed = p.getHp() - before;
 
                     if(ok){
