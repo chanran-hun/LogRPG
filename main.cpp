@@ -22,12 +22,12 @@ void typePrint(const string& s, int msPerChar){
         this_thread::sleep_for(chrono::milliseconds(msPerChar));
     }
 }
-//전투중 지연 삽입
+
 void battleDelay(){
     if (!DEBUG_MODE)
         this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
 }
-//체력바 표시
+
 string makeHpBar(int current, int maxHp, int barWidth = 12){
     //0으로 나누기 방지
     if(maxHp <= 0) return "[------------]";
@@ -43,7 +43,7 @@ string makeHpBar(int current, int maxHp, int barWidth = 12){
     bar += "]";
     return bar;
 }
-//멤버들간의 밸런스를 맞추기 위한 체력 성장, 치명타율, 방어력 성장, 공격력 성장 등의 데이터 상수들
+
 namespace Balance {
     constexpr double PLAYER_CRIT  = 0.20;
     constexpr double PLAYER_DODGE = 0.10;
@@ -56,12 +56,12 @@ namespace Balance {
     constexpr int BOSSMONSTER_ATK_DIV = 2;
     constexpr int BOSSMONSTER_DEF_DIV = 2;
 }
-//상점 품목
+
 namespace Shop {
     constexpr int POTION_HEAL = 20;     //포션의 회복량
     constexpr int POTION_PRICE = 15;    //포션의 가격
 }
-//플레이어
+
 class Player{ 
     string name; //플레이어의 캐릭터 이름
     int level;   //플레이어 레벨
@@ -73,7 +73,6 @@ class Player{
     int gold;    //플레이어 골드 보유량
     int potions; //플레이어 포션 보유량
 public: 
-    //생성자
     Player(string name, int maxHp, int atk, int def): 
     name(name), 
     level(1),
@@ -86,34 +85,16 @@ public:
     potions(0)
     {} 
     
-    int getAtk()const{
-        return atk;
-    }
-
-    int getDef()const{
-        return def;
-    }
-
-    string getName()const{
-        return name;
-    }
-
-    int getHp()const{
-        return hp;
-    }
-
-    int getMaxHp()const{
-        return maxHp;
-    }
-    //포션 수 반환
-    int getPotions()const{
-        return potions;
-    }
-    //포션 획득
+    int getAtk() const { return atk; }
+    int getDef() const { return def; }
+    string getName() const { return name; }
+    int getHp() const { return hp; }
+    int getMaxHp() const { return maxHp; }
+    
+    int getPotions() const { return potions; }
     void addPotions(int count = 1){
-        if(count > 0) potions += count;
+        if(count > 0) potions += count; //음수 방지
     }
-
     bool usePotion(int healAmount){
         if(potions <= 0) return false;  // 재고 0일때 사용 방지
         if(hp >= maxHp) return false;   // 풀피일 때 낭비 방지
@@ -122,54 +103,48 @@ public:
         return true;
     }
     
-    int getGold()const{
-        return gold;
-    }
-    //골드 획득
+    int getGold()const{ return gold; }
     void gainGold(int amount){
-        //음수값 방지
-        if( amount > 0){
+        
+        if( amount > 0){                //음수값 방지
             gold += amount;
         }
     }
-    //골드 사용
     bool spendGold(int amount){
-        //음수값 방지
-        if(amount <= 0) return true;
+        
+        if(amount <= 0) return true;    //음수값 방지
         if(amount > gold){
             return false;
         }
         gold -= amount;
         return true;
     }
-    //데미지를 받을 때 
+
     void takeDamage(int dmg){
         hp -= dmg;
         if(hp < 0) hp = 0;
     }
-    //체력 회복
+
     void heal(int amount){
         if(amount <= 0) return;
         hp = min(maxHp, hp + amount);
     }
+
     bool isAlive()const{
         return hp > 0;
     }
-    //풀피 확인
-    bool isFullHp(){
-        return getHp() >= getMaxHp();
+    bool isFullHp()const{
+        return hp >= maxHp;   //혹시 모르는 상황을 대비하여 클때도 포함
     }
-    //공격력 증가
+
     void increaseAtk(int amount = 1){
         atk += amount;
         cout << "공격력이 +" << amount << " 증가했습니다!\n";
     }
-
     void increaseDef(int amount = 1){
         def += amount;
         cout << "방어력이 +" << amount << " 증가했습니다!\n";
     }
-
     void increaseMaxHp(int amount = 5){
         maxHp += amount;
         hp = maxHp;
@@ -200,7 +175,7 @@ public:
         cout << "=====================\n";
     }
 }; 
-//몬스터
+
 class Monster{ 
     string name;  
     int hp; 
@@ -244,7 +219,7 @@ public:
         hp = max(0, hp - dmg);
     }
 };
-//상점
+
 void shop(Player& p){
     while(true){
         cout << "\n========== 상점 ==========\n";
@@ -281,13 +256,13 @@ void shop(Player& p){
         }
     }
 }
-//확률 관리
+
 bool rollChance(mt19937& rng, double p){
     p = clamp(p, 0.0, 1.0); //안전장치
     bernoulli_distribution d(p);
     return d(rng);
 }
-//보상 선택시 나오는 문구 관리
+
 string rewardText(int rewardIndex) {
     switch (rewardIndex){
         case 0: return "공격력 +1";
@@ -415,11 +390,11 @@ Monster makeMonster(int stage, mt19937& rng){
     
     return Monster(t.name, hp, atk, def);
 }
-//보스 판별
+
 bool isBossStage(int stage){
     return stage >= 5 && stage % 5 == 0;
 }
-//보스 몬스터 전용 인트로
+
 void showBossIntro(int stage, const Monster& m){
     cout << "==============================\n";
     this_thread::sleep_for(chrono::milliseconds(BOSS_INTRO_DELAY_MS));
@@ -436,7 +411,7 @@ void showBossIntro(int stage, const Monster& m){
         cout << "\n";
     }
 }
-//메뉴출력
+
 int stageMenuInput(){
     //선택지 제시
     cout << "\n다음 행동을 선택하세요:\n";
@@ -458,7 +433,7 @@ int stageMenuInput(){
     //선택 반환
     return choice;
 }
-//전투진행
+
 void battle(Player &p, Monster &m, mt19937& rng, int stage){
     //1) 턴 카운트하기
     int turn = 1;
