@@ -31,7 +31,7 @@ void battleDelay(){
 
 string makeHpBar(int current, int maxHp, int barWidth = 12){
     //0으로 나누기 방지
-    if(maxHp <= 0) return "[------------]";
+    if(maxHp <= 0) return "[" + string(barWidth, '-') = "]";
     //current값 보정
     current = clamp(current, 0, maxHp);
     int filled = (current * barWidth) / maxHp;
@@ -94,10 +94,10 @@ public:
     
     int getPotions() const { return potions; }
     void addPotions(int count = 1){
-        if(count > 0) potions += count; //음수 방지
+        if(count > 0) potions += count; //외부 실수로 음수 전달되는 상황 방지
     }
     bool usePotion(int healAmount){
-        if(potions <= 0) return false;  // 재고 0일때 사용 방지
+        if(potions <= 0) return false;  // 포션 재고 0일때 사용 방지
         if(hp >= maxHp) return false;   // 풀피일 때 낭비 방지
         potions--;                      
         heal(healAmount);        
@@ -135,7 +135,7 @@ public:
         return hp > 0;
     }
     bool isFullHp()const{
-        return hp >= maxHp;   //혹시 모르는 상황을 대비하여 클때도 포함
+        return hp >= maxHp;   //버그로 hp가 maxHp를 넘는 상황도 대비
     }
 
     void increaseAtk(int amount = 1){
@@ -241,10 +241,10 @@ void shop(Player& p){
             continue;
         }
         //입력 처리하기
-        if(choice == 0){                    //0 입력시
-            cout << "상점을 나갑니다\n";
+        if(choice == 0){                    //0 입력 시
+            cout << "상점을 나갑니다.\n";
             break;
-        } else if(choice == 1)  {           //1 입력시 
+        } else if(choice == 1)  {           //1 입력 시 
             //돈이 모자르는 경우.
             if(!p.spendGold(Shop::POTION_PRICE)){   
                 cout << p.getName() << ": 아직 돈이 모자르는군... 돈을 더 벌어오도록 하자...\n";
@@ -257,6 +257,22 @@ void shop(Player& p){
             cout << "잘못된 입력입니다.\n";
         }
     }
+}
+
+void tryUsePotionFromMenu(Player& p){
+    if(p.getPotions() <= 0){
+        cout << p.getName() << ": 지금은 사용할 포션이 없는 것 같군...\n";
+        return;
+    }
+    if(p.isFullHp()){
+        cout << p.getName() << ": 지금은 풀피라 포션을 쓸 필요가 없을 것 같네. 잘 챙겨 두도록 하자.\n";
+        return;
+    } 
+    int before = p.getHp();
+    bool ok = p.usePotion(Shop::POTION_HEAL);
+    int healed = p.getHp() - before;
+    cout << p.getName() << ": 포션을 마셨다. HP +" << healed << " (현재: " << p.getHp() << "/" << p.getMaxHp() << ")\n";
+    cout << p.getName() << ": 포션이 " << p.getPotions() << "개 남아있군.\n";
 }
 
 bool rollChance(mt19937& rng, double p){
@@ -425,7 +441,7 @@ int stageMenuInput(){
     //선택 입력
     int choice;
     cin >> choice;
-    //입력 실패시
+    //입력 실패 시
     if (cin.fail()){
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -549,31 +565,15 @@ int main(){
             //선택지 제시 + 선택
             int sel = stageMenuInput();
             //선택지 적용
-            if(sel == 1){           //다음 스테이지 진행
+            if (sel == 1) {           //다음 스테이지 진행
                 break;  
-            } else if(sel == 2){    //상점으로 이동
+            } else if (sel == 2) {    //상점으로 이동
                 shop(p);
-            } else if(sel == 3){    //상태 표시
+            } else if (sel == 3) {    //상태 표시
                 p.printSummary();
-            } else if(sel == 4){
-                if(p.getPotions() <= 0){
-                    cout << p.getName() << ": 지금은 사용할 포션이 없는 것 같군...\n";
-                } else if(p.isFullHp()){
-                    cout << p.getName() << ": 지금은 풀피라 포션을 쓸 필요가 없을 것 같네. 잘 챙겨 두도록 하자.\n";
-                } else  {
-                    int before = p.getHp();
-                    bool ok = p.usePotion(Shop::POTION_HEAL);
-                    int healed = p.getHp() - before;
-
-                    if(ok){
-                        cout << p.getName() << ": 포션을 마셨다. HP +" << healed << " (현재: " << p.getHp() << "/" << p.getMaxHp() << ")\n";
-                        cout << p.getName() << ": 포션이 " << p.getPotions() << "개 남아있군.\n";
-                    } else {
-                        //혹시모를 상황을 위한 곳
-                        cout << p.getName() << ": 지금은 포션을 사용할 수 없겠군\n";
-                    }
-                }
-            }else if(sel == 0){    //게임 종료
+            } else if (sel == 4) {
+                tryUsePotionFromMenu(p);
+            } else if (sel == 0) {    //게임 종료
                 cout << "\n게임을 종료합니다.\n";
                 return 0;
             } else {
