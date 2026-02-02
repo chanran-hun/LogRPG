@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-#include <algorithm>    //max, shuffle, clamp
+#include <algorithm>    //max, min, shuffle, clamp
 #include <vector>
 #include <random>
 #include <string>
@@ -24,8 +24,9 @@ void typePrint(const string& s, int msPerChar){
 }
 
 void battleDelay(){
-    if (!DEBUG_MODE)
+    if (!DEBUG_MODE) {
         this_thread::sleep_for(chrono::milliseconds(BATTLE_DELAY_MS));
+    }
 }
 
 string makeHpBar(int current, int maxHp, int barWidth = 12){
@@ -224,6 +225,7 @@ void shop(Player& p){
     while(true){
         cout << "\n========== 상점 ==========\n";
         cout << "보유 골드: " << p.getGold() << "\n";
+        cout << "포션 보유량: " << p.getPotions() << "\n";
         cout << "현재 체력: " << p.getHp() << " / " << p.getMaxHp() << " " << makeHpBar(p.getHp(), p.getMaxHp()) << "\n";
         cout << "--------------------------\n";
         cout << "1) 포션 구매 (HP +" << Shop::POTION_HEAL << ") - " << Shop::POTION_PRICE << "G\n";
