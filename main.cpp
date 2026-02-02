@@ -118,7 +118,7 @@ public:
         if(potions <= 0) return false;  // 재고 0일때 사용 방지
         if(hp >= maxHp) return false;   // 풀피일 때 낭비 방지
         potions--;                      
-        heal(Shop::POTION_HEAL);        
+        heal(healAmount);        
         return true;
     }
     
@@ -580,9 +580,9 @@ int main(){
                 p.printSummary();
             } else if(sel == 4){
                 if(p.getPotions() <= 0){
-                    cout << p.getName() << ": 지금은 사용할 포션이 없는것 같군...\n";
+                    cout << p.getName() << ": 지금은 사용할 포션이 없는 것 같군...\n";
                 } else if(p.isFullHp()){
-                    cout << p.getName() << ": 지금은 풀피라 포션을 쓸 필요가 없을것 같네 쟁여둬야지.\n";
+                    cout << p.getName() << ": 지금은 풀피라 포션을 쓸 필요가 없을 것 같네. 잘 챙겨 두도록 하자.\n";
                 } else  {
                     int before = p.getHp();
                     bool ok = p.usePotion(Shop::POTION_HEAL);
