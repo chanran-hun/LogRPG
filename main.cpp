@@ -31,7 +31,7 @@ void battleDelay(){
 
 string makeHpBar(int current, int maxHp, int barWidth = 12){
     //0으로 나누기 방지
-    if(maxHp <= 0) return "[" + string(barWidth, '-') = "]";
+    if(maxHp <= 0) return "[" + string(barWidth, '-') + "]";
     //current값 보정
     current = clamp(current, 0, maxHp);
     int filled = (current * barWidth) / maxHp;
@@ -224,33 +224,33 @@ public:
 void shop(Player& p){
     while(true){
         cout << "\n========== 상점 ==========\n";
-        cout << "보유 골드: " << p.getGold() << "\n";
-        cout << "포션 보유량: " << p.getPotions() << "\n";
-        cout << "현재 체력: " << p.getHp() << " / " << p.getMaxHp() << " " << makeHpBar(p.getHp(), p.getMaxHp()) << "\n";
+        cout << "보유 골드      : " << p.getGold() << "\n";
+        cout << "포션 보유량    : " << p.getPotions() << "\n";
+        cout << "현재 체력      : " << p.getHp() << " / " << p.getMaxHp() << " " << makeHpBar(p.getHp(), p.getMaxHp()) << "\n";
         cout << "--------------------------\n";
         cout << "1) 포션 구매 (HP +" << Shop::POTION_HEAL << ") - " << Shop::POTION_PRICE << "G\n";
         cout << "0) 나가기\n> ";
 
         int choice;
         cin >> choice;
-        //입력 실패 방어
-        if(cin.fail()){
+        
+        if(cin.fail()){     // 입력 실패 대비
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "숫자만 입력해주세요.\n";
             continue;
         }
-        //입력 처리하기
-        if(choice == 0){                    //0 입력 시
+
+        if(choice == 0){                    
             cout << "상점을 나갑니다.\n";
             break;
-        } else if(choice == 1)  {           //1 입력 시 
-            //돈이 모자르는 경우.
+        } else if(choice == 1)  {            
+            
             if(!p.spendGold(Shop::POTION_PRICE)){   
                 cout << p.getName() << ": 아직 돈이 모자르는군... 돈을 더 벌어오도록 하자...\n";
                 continue;
             }
-            //포션 구매
+            
             p.addPotions(1);
             cout << p.getName() << ": 포션을 구매했다. 현재 가지고 있는 포션이 " << p.getPotions() << "개다.\n";
         } else {
@@ -269,7 +269,7 @@ void tryUsePotionFromMenu(Player& p){
         return;
     } 
     int before = p.getHp();
-    bool ok = p.usePotion(Shop::POTION_HEAL);
+    p.usePotion(Shop::POTION_HEAL);
     int healed = p.getHp() - before;
     cout << p.getName() << ": 포션을 마셨다. HP +" << healed << " (현재: " << p.getHp() << "/" << p.getMaxHp() << ")\n";
     cout << p.getName() << ": 포션이 " << p.getPotions() << "개 남아있군.\n";
@@ -302,13 +302,11 @@ void applyReward(Player& p, int rewardIndex){
 }
 
 void chooseReward(Player& p, mt19937& rng, int rewardCount){
-    // 1) 보상 후보 인덱스 목록
     vector<int> idx = {0,1,2};
-    // 2) 인덱스 랜덤하게 섞기
+    
     shuffle(idx.begin(), idx.end() ,rng);
-    // 3) 화면에 선택 목록 추가
-    //rewardCount값 범위 이탈 방지
-    rewardCount = clamp(rewardCount,1,(int)idx.size());
+    
+    rewardCount = clamp(rewardCount,1,(int)idx.size()); // rewardCount값 범위 이탈 방지
     if(rewardCount==3){
         typePrint("\n✨ 보스 전용 보상을 선택해주세요 ✨\n", 25);
     } else {
@@ -319,17 +317,17 @@ void chooseReward(Player& p, mt19937& rng, int rewardCount){
         battleDelay();
     }
     cout << "\n>";
-    // 4) 사용자 입력 받기
+    
     int choice = 0;
     cin >> choice;
-    // 4)-1 입력 실패 처리
+    
     if (cin.fail()) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "숫자만 입력해주세요. 1번을 선택합니다.\n";
         choice = 1;
     }
-    // 5) 사용자 입력 처리
+    
     int chosen = 0;
     if(choice >= 1 && choice <= rewardCount){
         chosen = idx[choice-1];
@@ -337,8 +335,7 @@ void chooseReward(Player& p, mt19937& rng, int rewardCount){
         cout << "잘못된 입력입니다. 1번을 선택합니다.\n";
         chosen = idx[0];
     }
-    // 7) chosen에 따라 효과 적용
-    applyReward(p,chosen);
+    
 
     cout << "[STAT] ATK:" << p.getAtk() << " DEF:" << p.getDef() << " HP:" << p.getHp() << endl;
 }
@@ -431,24 +428,24 @@ void showBossIntro(int stage, const Monster& m){
 }
 
 int stageMenuInput(){
-    //선택지 제시
+    
     cout << "\n다음 행동을 선택하세요:\n";
     cout << "1) 다음 스테이지로\n";
     cout << "2) 상점\n";
     cout << "3) 상태 보기\n";
     cout << "4) 포션 사용\n";
     cout << "0) 게임 종료\n> ";
-    //선택 입력
+    
     int choice;
     cin >> choice;
-    //입력 실패 시
+    
     if (cin.fail()){
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "숫자만 입력해주세요. 기본값으로 1번(다음 스테이지)을 선택합니다.\n";
         return 1;
     }
-    //선택 반환
+    
     return choice;
 }
 
@@ -551,7 +548,7 @@ int main(){
     for(int stage = 1; stage <= 10; stage++){
         
         Monster m = makeMonster(stage, rng);
-        //보스 전용 인트로
+
         if(isBossStage(stage)){
             showBossIntro(stage,m);
         } else {
@@ -560,20 +557,19 @@ int main(){
 
         battle(p, m, rng, stage);
         if(!p.isAlive()) break;
-        //스테이지 클리어 후 메뉴
-        while(true){
-            //선택지 제시 + 선택
+        
+        while(true){    // 스테이지 클리어 후
             int sel = stageMenuInput();
-            //선택지 적용
-            if (sel == 1) {           //다음 스테이지 진행
+            
+            if (sel == 1) {           
                 break;  
-            } else if (sel == 2) {    //상점으로 이동
+            } else if (sel == 2) {    
                 shop(p);
-            } else if (sel == 3) {    //상태 표시
+            } else if (sel == 3) {    
                 p.printSummary();
             } else if (sel == 4) {
                 tryUsePotionFromMenu(p);
-            } else if (sel == 0) {    //게임 종료
+            } else if (sel == 0) {    
                 cout << "\n게임을 종료합니다.\n";
                 return 0;
             } else {
