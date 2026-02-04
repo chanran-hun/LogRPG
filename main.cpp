@@ -336,8 +336,10 @@ void chooseReward(Player& p, mt19937& rng, int rewardCount){
         chosen = idx[0];
     }
     
+    cout << "선택한 보상: " << rewardText(chosen) << "\n";
+    applyReward(p,chosen);
 
-    cout << "[STAT] ATK:" << p.getAtk() << " DEF:" << p.getDef() << " HP:" << p.getHp() << endl;
+    cout << "[STAT] ATK:" << p.getAtk() << " DEF:" << p.getDef() << " HP:" << p.getHp() << "/" << p.getMaxHp() << "\n";
 }
 
 struct MonsterTemplate{
@@ -529,6 +531,7 @@ int main(){
     mt19937 rng(random_device{}());
 
     Player p = Player("Hero", 60, 14, 4);
+    p.printSummary();
 
     cout << "모드를 선택하세요:\n";
     cout << "1) 플레이 모드\n";
